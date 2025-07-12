@@ -1,0 +1,31 @@
+{
+  "name": "json-formatter",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc && vite build",
+    "ci:eslint": "eslint -f json src -o ./.ci/eslint.json",
+    "dev": "vite",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.6.0",
+    "monaco-editor": "^0.45.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^9.31.0",
+    "eslint-config-ali": "^16.3.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "less": "^4.3.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8"
+  }
+}
