@@ -2,6 +2,10 @@
 
 A beautiful, fast, and reliable JSON formatter with syntax highlighting.
 
+## Preview
+
+![JSON Formatter Preview](./src/assets/preview.png)
+
 ## Features
 
 - JSON formatting and validation

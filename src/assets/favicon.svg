@@ -1,0 +1,4 @@
+<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+  <!-- 去掉背景，默认透明 -->
+  <text x="10" y="28" font-size="28" font-family="monospace" fill="#569CD6">&gt;</text>
+</svg>
