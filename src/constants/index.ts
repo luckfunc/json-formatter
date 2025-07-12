@@ -1,3 +1,5 @@
+declare const __BUILD_TIME__: string;
+
 export const DEFAULT_JSON = `{
   "name": "JSON Formatter",
   "version": "1.0.0",
@@ -5,6 +7,7 @@ export const DEFAULT_JSON = `{
   "author": "const",
   "site": "https://json.const.site",
   "blog": "https://blog.luckfunc.com",
+  "updateTime": "${__BUILD_TIME__}",
   "features": [
     "format",
     "minify",
