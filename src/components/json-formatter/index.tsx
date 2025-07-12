@@ -1,14 +1,14 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import Editor from '@monaco-editor/react';
-import { DEFAULT_JSON } from '../constants';
-import './JsonFormatter.less';
+import { DEFAULT_JSON } from '../../constants';
+import './style.less';
 
 interface JsonFormatterProps {
   isDarkMode: boolean;
   onThemeChange: (isDark: boolean) => void;
 }
 
-const JsonFormatter: React.FC<JsonFormatterProps> = ({ isDarkMode, onThemeChange }) => {
+export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatterProps) {
   const [inputJson, setInputJson] = useState(DEFAULT_JSON);
   const [outputJson, setOutputJson] = useState('');
   const [error, setError] = useState('');
@@ -185,6 +185,4 @@ const JsonFormatter: React.FC<JsonFormatterProps> = ({ isDarkMode, onThemeChange
       </div>
     </div>
   );
-};
-
-export default JsonFormatter;
+}

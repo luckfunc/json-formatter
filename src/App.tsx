@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import JsonFormatter from './components/JsonFormatter';
+import JsonFormatter from './components/json-formatter';
 import './App.less';
 
 export default function App() {
