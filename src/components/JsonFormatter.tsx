@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import Editor from '@monaco-editor/react';
+import { DEFAULT_JSON } from '../constants';
 import './JsonFormatter.less';
 
 interface JsonFormatterProps {
@@ -8,23 +9,7 @@ interface JsonFormatterProps {
 }
 
 const JsonFormatter: React.FC<JsonFormatterProps> = ({ isDarkMode, onThemeChange }) => {
-  const [inputJson, setInputJson] = useState(`{
-  "name": "JSON Formatter",
-  "version": "1.0.0",
-  "description": "A beautiful JSON formatting tool",
-  "features": ["format", "minify", "validate", "copy", "download"],
-  "author": {
-    "name": "Developer",
-    "email": "dev@example.com"
-  },
-  "nested": {
-    "level1": {
-      "level2": {
-        "data": "deeply nested value"
-      }
-    }
-  }
-}`);
+  const [inputJson, setInputJson] = useState(DEFAULT_JSON);
   const [outputJson, setOutputJson] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -43,6 +28,25 @@ const JsonFormatter: React.FC<JsonFormatterProps> = ({ isDarkMode, onThemeChange
       setSuccess('');
     }
   }, [inputJson]);
+
+  const handleInputChange = useCallback((value: string | undefined) => {
+    const newValue = value || '';
+    setInputJson(newValue);
+
+    // Auto-format on paste if it's valid JSON
+    try {
+      const parsed = JSON.parse(newValue);
+      const formatted = JSON.stringify(parsed, null, 2);
+      setOutputJson(formatted);
+      setError('');
+    } catch {
+      // Don't show error for partial input while typing
+      if (newValue.trim()) {
+        setError('');
+        setOutputJson('');
+      }
+    }
+  }, []);
 
   const minifyJson = useCallback(() => {
     try {
@@ -72,7 +76,7 @@ const JsonFormatter: React.FC<JsonFormatterProps> = ({ isDarkMode, onThemeChange
         await navigator.clipboard.writeText(outputJson);
         setSuccess('Copied to clipboard!');
         setTimeout(() => setSuccess(''), 3000);
-      } catch (err) {
+      } catch {
         setError('Failed to copy to clipboard');
       }
     }
@@ -105,29 +109,29 @@ const JsonFormatter: React.FC<JsonFormatterProps> = ({ isDarkMode, onThemeChange
       <div className={`controls-bar ${themeClass}`}>
         <div className="button-group">
           <button className={`button primary ${themeClass}`} onClick={formatJson}>
-            fmt
+            format
           </button>
           <button className={`button ${themeClass}`} onClick={minifyJson}>
-            min
+            minify
           </button>
           <button
             className={`button ${themeClass}`}
             onClick={copyToClipboard}
             disabled={!outputJson}
           >
-            cp
+            copy
           </button>
           <button
             className={`button ${themeClass}`}
             onClick={downloadJson}
             disabled={!outputJson}
           >
-            dl
+            download
           </button>
         </div>
         <div className="theme-controls">
           <button className={`button danger ${themeClass}`} onClick={clearAll}>
-            clr
+            clear
           </button>
           <button className={`button theme-button ${themeClass}`} onClick={toggleTheme}>
             {isDarkMode ? '☀️' : '🌙'}
@@ -145,7 +149,7 @@ const JsonFormatter: React.FC<JsonFormatterProps> = ({ isDarkMode, onThemeChange
             height="100%"
             defaultLanguage="json"
             value={inputJson}
-            onChange={(value) => setInputJson(value || '')}
+            onChange={handleInputChange}
             theme={isDarkMode ? 'vs-dark' : 'vs'}
             options={{
               minimap: { enabled: false },
