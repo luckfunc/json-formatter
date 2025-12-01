@@ -1,8 +1,6 @@
-declare const __BUILD_TIME__: string;
-
 export const DEFAULT_JSON = `{
   "name": "JSON Formatter",
-  "version": "1.0.0",
+  "version": "${__BUILD_VERSION__}",
   "description": "A beautiful JSON formatting tool",
   "author": "const",
   "site": "https://json.const.site",
