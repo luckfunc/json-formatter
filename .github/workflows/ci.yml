@@ -45,5 +45,6 @@ jobs:
           username: ${{ secrets.REMOTE_NAME }}
           password: ${{ secrets.REMOTE_PASS }}
           target: ${{ secrets.REMOTE_TARGET }}
-          source: "dist/*"
+          source: "dist/"
+          strip_components: 1
           overwrite: true
