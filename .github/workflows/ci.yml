@@ -46,5 +46,4 @@ jobs:
           password: ${{ secrets.REMOTE_PASS }}
           target: ${{ secrets.REMOTE_TARGET }}
           source: "dist/*"
-          strip_components: 3
           overwrite: true
