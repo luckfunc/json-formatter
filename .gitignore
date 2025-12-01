@@ -42,3 +42,5 @@ temp/
 
 # CI/Build artifacts
 .ci/
+# Create Biome
+.biomeignore

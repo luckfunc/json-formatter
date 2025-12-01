@@ -108,16 +108,17 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
     <div className={`formatter-container ${themeClass}`}>
       <div className={`controls-bar ${themeClass}`}>
         <div className="button-group">
-          <button className={`button primary ${themeClass}`} onClick={formatJson}>
+          <button className={`button primary ${themeClass}`} onClick={formatJson} type="button">
             format
           </button>
-          <button className={`button ${themeClass}`} onClick={minifyJson}>
+          <button className={`button ${themeClass}`} onClick={minifyJson} type="button">
             minify
           </button>
           <button
             className={`button ${themeClass}`}
             onClick={copyToClipboard}
             disabled={!outputJson}
+            type="button"
           >
             copy
           </button>
@@ -125,15 +126,20 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
             className={`button ${themeClass}`}
             onClick={downloadJson}
             disabled={!outputJson}
+            type="button"
           >
             download
           </button>
         </div>
         <div className="theme-controls">
-          <button className={`button danger ${themeClass}`} onClick={clearAll}>
+          <button className={`button danger ${themeClass}`} onClick={clearAll} type="button">
             clear
           </button>
-          <button className={`button theme-button ${themeClass}`} onClick={toggleTheme}>
+          <button
+            className={`button theme-button ${themeClass}`}
+            onClick={toggleTheme}
+            type="button"
+          >
             {isDarkMode ? '☀️' : '🌙'}
           </button>
         </div>
