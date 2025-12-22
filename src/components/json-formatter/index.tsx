@@ -99,7 +99,10 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
     try {
       const url = new URL(window.location.href);
       const encoded = await compress(inputJson);
-      url.searchParams.set(URL_PARAM, encoded);
+      const hashParams = new URLSearchParams(url.hash.slice(1));
+      hashParams.set(URL_PARAM, encoded);
+      url.hash = hashParams.toString();
+      url.searchParams.delete(URL_PARAM);
 
       await navigator.clipboard.writeText(url.toString());
       setSuccess('Share URL copied!');
@@ -114,8 +117,13 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
     let cancelled = false;
 
     const loadFromUrl = async () => {
-      const params = new URLSearchParams(window.location.search);
-      const encoded = params.get(URL_PARAM);
+      const hashParams = new URLSearchParams(window.location.hash.slice(1));
+      let encoded = hashParams.get(URL_PARAM);
+
+      if (!encoded) {
+        const searchParams = new URLSearchParams(window.location.search);
+        encoded = searchParams.get(URL_PARAM);
+      }
 
       if (!encoded) {
         setHasInitializedFromUrl(true);
@@ -156,16 +164,20 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
     const syncToUrl = async () => {
       try {
         const url = new URL(window.location.href);
+        const hashParams = new URLSearchParams(url.hash.slice(1));
 
         if (!inputJson) {
-          url.searchParams.delete(URL_PARAM);
+          hashParams.delete(URL_PARAM);
         } else {
           const encoded = await compress(inputJson);
           if (cancelled) {
             return;
           }
-          url.searchParams.set(URL_PARAM, encoded);
+          hashParams.set(URL_PARAM, encoded);
         }
+
+        url.hash = hashParams.toString();
+        url.searchParams.delete(URL_PARAM);
 
         if (!cancelled) {
           window.history.replaceState(null, '', url.toString());
