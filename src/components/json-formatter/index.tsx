@@ -1,7 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { DEFAULT_JSON } from '../../constants';
+import { compress, decompress } from '../../utils';
 import './style.less';
+
+const URL_PARAM = 'json';
 
 interface JsonFormatterProps {
   isDarkMode: boolean;
@@ -13,6 +16,27 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
   const [outputJson, setOutputJson] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [hasInitializedFromUrl, setHasInitializedFromUrl] = useState(false);
+
+  const applyInputValue = useCallback((value: string) => {
+    setInputJson(value);
+    setSuccess('');
+
+    try {
+      const parsed = JSON.parse(value);
+      const formatted = JSON.stringify(parsed, null, 2);
+      setOutputJson(formatted);
+      setError('');
+    } catch {
+      if (value.trim()) {
+        setError('');
+        setOutputJson('');
+      } else {
+        setError('');
+        setOutputJson('');
+      }
+    }
+  }, []);
 
   const formatJson = useCallback(() => {
     try {
@@ -30,23 +54,8 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
   }, [inputJson]);
 
   const handleInputChange = useCallback((value: string | undefined) => {
-    const newValue = value || '';
-    setInputJson(newValue);
-
-    // Auto-format on paste if it's valid JSON
-    try {
-      const parsed = JSON.parse(newValue);
-      const formatted = JSON.stringify(parsed, null, 2);
-      setOutputJson(formatted);
-      setError('');
-    } catch {
-      // Don't show error for partial input while typing
-      if (newValue.trim()) {
-        setError('');
-        setOutputJson('');
-      }
-    }
-  }, []);
+    applyInputValue(value || '');
+  }, [applyInputValue]);
 
   const minifyJson = useCallback(() => {
     try {
@@ -81,6 +90,100 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
       }
     }
   }, [outputJson]);
+
+  const copyShareUrl = useCallback(async () => {
+    if (!inputJson) {
+      return;
+    }
+
+    try {
+      const url = new URL(window.location.href);
+      const encoded = await compress(inputJson);
+      url.searchParams.set(URL_PARAM, encoded);
+
+      await navigator.clipboard.writeText(url.toString());
+      setSuccess('Share URL copied!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch {
+      setError('Failed to copy share URL');
+      setTimeout(() => setError(''), 3000);
+    }
+  }, [inputJson]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadFromUrl = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const encoded = params.get(URL_PARAM);
+
+      if (!encoded) {
+        setHasInitializedFromUrl(true);
+        return;
+      }
+
+      try {
+        const text = await decompress(encoded);
+        if (!cancelled) {
+          applyInputValue(text);
+        }
+      } catch {
+        if (!cancelled) {
+          setError('Failed to read JSON from URL');
+          setTimeout(() => setError(''), 3000);
+        }
+      } finally {
+        if (!cancelled) {
+          setHasInitializedFromUrl(true);
+        }
+      }
+    };
+
+    loadFromUrl();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [applyInputValue]);
+
+  useEffect(() => {
+    if (!hasInitializedFromUrl) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const syncToUrl = async () => {
+      try {
+        const url = new URL(window.location.href);
+
+        if (!inputJson) {
+          url.searchParams.delete(URL_PARAM);
+        } else {
+          const encoded = await compress(inputJson);
+          if (cancelled) {
+            return;
+          }
+          url.searchParams.set(URL_PARAM, encoded);
+        }
+
+        if (!cancelled) {
+          window.history.replaceState(null, '', url.toString());
+        }
+      } catch {
+        if (!cancelled) {
+          setError('Failed to sync JSON to URL');
+          setTimeout(() => setError(''), 3000);
+        }
+      }
+    };
+
+    syncToUrl();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [inputJson, hasInitializedFromUrl]);
 
   const downloadJson = useCallback(() => {
     if (outputJson) {
@@ -121,6 +224,14 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
             type="button"
           >
             copy
+          </button>
+          <button
+            className={`button ${themeClass}`}
+            onClick={copyShareUrl}
+            disabled={!inputJson}
+            type="button"
+          >
+            share
           </button>
           <button
             className={`button ${themeClass}`}
