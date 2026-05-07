@@ -195,11 +195,11 @@
   align-items: center;
   gap: 6px;
   max-width: 70%;
+  min-width: 0;
   overflow: hidden;
   text-transform: none;
   letter-spacing: 0;
   white-space: nowrap;
-  text-overflow: ellipsis;
 
   &.valid {
     &.dark {
@@ -234,6 +234,12 @@
   }
 }
 
+.validation-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .validation-dot {
   width: 6px;
   height: 6px;
@@ -241,43 +247,4 @@
   border-radius: 50%;
   background: currentColor;
   box-shadow: 0 0 0 3px transparent;
-}
-
-.error-message {
-  padding: 9px 16px;
-  border-bottom: 1px solid;
-  font-size: 12px;
-  font-family: inherit;
-  font-weight: 600;
-
-  &.dark {
-    background: @dark-error-bg;
-    color: @dark-error;
-    border-color: @dark-error-border;
-  }
-
-  &.light {
-    background: @light-error-bg;
-    color: @light-error;
-    border-color: @light-error-border;
-  }
-}
-
-.success-message {
-  padding: 6px 12px;
-  border-bottom: 1px solid;
-  font-size: 11px;
-  font-family: inherit;
-
-  &.dark {
-    background: @dark-success-bg;
-    color: @dark-success;
-    border-color: @dark-success-border;
-  }
-
-  &.light {
-    background: @light-success-bg;
-    color: @light-success;
-    border-color: @light-success-border;
-  }
 }

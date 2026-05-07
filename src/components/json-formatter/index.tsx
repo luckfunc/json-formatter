@@ -106,6 +106,8 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
   const validationError =
     jsonValidation.status === 'invalid' ? `Invalid JSON: ${jsonValidation.message}` : '';
   const activeError = error || validationError;
+  const statusText = activeError || success || jsonValidation.message;
+  const statusType = activeError ? 'invalid' : success ? 'valid' : jsonValidation.status;
 
   return (
     <div className={`formatter-container ${themeClass}`}>
@@ -148,16 +150,13 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
         </div>
       </div>
 
-      {activeError && <div className={`error-message ${themeClass}`}>{activeError}</div>}
-      {success && <div className={`success-message ${themeClass}`}>{success}</div>}
-
       <div className="editor-section">
         <div className={`editor-panel ${themeClass}`}>
           <div className={`panel-header ${themeClass}`}>
             <span>json</span>
-            <span className={`validation-status ${themeClass} ${jsonValidation.status}`}>
+            <span className={`validation-status ${themeClass} ${statusType}`} title={statusText}>
               <span className="validation-dot" />
-              {jsonValidation.message}
+              <span className="validation-text">{statusText}</span>
             </span>
           </div>
           <Editor
@@ -167,7 +166,9 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
             onChange={handleInputChange}
             theme={isDarkMode ? 'vs-dark' : 'vs'}
             options={{
+              contextmenu: false,
               minimap: { enabled: false },
+              mouseWheelZoom: true,
               scrollBeyondLastLine: false,
               fontSize: 13,
               lineNumbers: 'on',
