@@ -30,6 +30,7 @@
   "linter": {
     "rules": {
       "style": {
+        "useBlockStatements": "error",
         "useNodejsImportProtocol": "off",
         "noNonNullAssertion": "off"
       },
