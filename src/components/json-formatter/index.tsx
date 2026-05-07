@@ -1,6 +1,12 @@
 import { useState, useCallback, useMemo } from 'react';
-import Editor from '@monaco-editor/react';
-import { DEFAULT_JSON } from '@constants';
+import Editor, { type BeforeMount } from '@monaco-editor/react';
+import {
+  DEFAULT_JSON,
+  VITESSE_DARK_MONACO_THEME,
+  VITESSE_DARK_THEME,
+  VITESSE_LIGHT_MONACO_THEME,
+  VITESSE_LIGHT_THEME,
+} from '@constants';
 import { validateJson } from '@utils';
 import './style.less';
 
@@ -102,7 +108,13 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
     onThemeChange(!isDarkMode);
   }, [isDarkMode, onThemeChange]);
 
+  const registerEditorThemes = useCallback<BeforeMount>((monaco) => {
+    monaco.editor.defineTheme(VITESSE_DARK_THEME, VITESSE_DARK_MONACO_THEME);
+    monaco.editor.defineTheme(VITESSE_LIGHT_THEME, VITESSE_LIGHT_MONACO_THEME);
+  }, []);
+
   const themeClass = isDarkMode ? 'dark' : 'light';
+  const editorTheme = isDarkMode ? VITESSE_DARK_THEME : VITESSE_LIGHT_THEME;
   const validationError =
     jsonValidation.status === 'invalid' ? `Invalid JSON: ${jsonValidation.message}` : '';
   const activeError = error || validationError;
@@ -164,7 +176,8 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
             defaultLanguage="json"
             value={jsonText}
             onChange={handleInputChange}
-            theme={isDarkMode ? 'vs-dark' : 'vs'}
+            beforeMount={registerEditorThemes}
+            theme={editorTheme}
             options={{
               contextmenu: false,
               minimap: { enabled: false },
