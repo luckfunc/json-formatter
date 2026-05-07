@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { JsonFormatter, GitHubIcon } from './components';
+import { GitHubIcon, JsonFormatter } from '@components';
 import './App.less';
 
 export default function App() {

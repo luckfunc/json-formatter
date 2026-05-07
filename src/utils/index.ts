@@ -1,25 +1,28 @@
-export async function compress(str: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(str);
+export type ValidationStatus = 'empty' | 'valid' | 'invalid';
 
-  const cs = new CompressionStream('gzip');
-  const writer = cs.writable.getWriter();
-  writer.write(data);
-  writer.close();
-
-  const compressed = await new Response(cs.readable).arrayBuffer();
-
-  return btoa(String.fromCharCode(...new Uint8Array(compressed)));
+export interface JsonValidation {
+  status: ValidationStatus;
+  message: string;
 }
 
-export async function decompress(base64: string): Promise<string> {
-  const binary = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+export function validateJson(value: string): JsonValidation {
+  if (!value.trim()) {
+    return {
+      status: 'empty',
+      message: 'empty',
+    };
+  }
 
-  const ds = new DecompressionStream('gzip');
-  const writer = ds.writable.getWriter();
-  writer.write(binary);
-  writer.close();
-
-  const decompressed = await new Response(ds.readable).arrayBuffer();
-  return new TextDecoder().decode(decompressed);
+  try {
+    JSON.parse(value);
+    return {
+      status: 'valid',
+      message: 'valid',
+    };
+  } catch (err) {
+    return {
+      status: 'invalid',
+      message: (err as Error).message,
+    };
+  }
 }
