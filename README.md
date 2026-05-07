@@ -53,7 +53,7 @@ pnpm lint:fix    # Fix auto-fixable issues
 - Vite
 - Less
 - Monaco Editor
-- ESLint
+- Biome
 
 ## License
 
