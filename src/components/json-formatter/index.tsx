@@ -1,5 +1,6 @@
-import { useState, useCallback, useMemo } from 'react';
-import Editor, { type BeforeMount } from '@monaco-editor/react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import Editor, { type BeforeMount, type OnMount } from '@monaco-editor/react';
+import type { IDisposable } from 'monaco-editor';
 import {
   DEFAULT_JSON,
   VITESSE_DARK_MONACO_THEME,
@@ -15,10 +16,19 @@ interface JsonFormatterProps {
   onThemeChange: (isDark: boolean) => void;
 }
 
+function formatJsonValue(value: string) {
+  return JSON.stringify(JSON.parse(value), null, 2);
+}
+
+function minifyJsonValue(value: string) {
+  return JSON.stringify(JSON.parse(value));
+}
+
 export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatterProps) {
   const [jsonText, setJsonText] = useState(DEFAULT_JSON);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const pasteDisposableRef = useRef<IDisposable | null>(null);
   const jsonValidation = useMemo(() => validateJson(jsonText), [jsonText]);
 
   const applyJsonValue = useCallback((value: string) => {
@@ -29,8 +39,7 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
 
   const formatJson = useCallback(() => {
     try {
-      const parsed = JSON.parse(jsonText);
-      const formatted = JSON.stringify(parsed, null, 2);
+      const formatted = formatJsonValue(jsonText);
       setJsonText(formatted);
       setError('');
       setSuccess('JSON formatted successfully!');
@@ -50,8 +59,7 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
 
   const minifyJson = useCallback(() => {
     try {
-      const parsed = JSON.parse(jsonText);
-      const minified = JSON.stringify(parsed);
+      const minified = minifyJsonValue(jsonText);
       setJsonText(minified);
       setError('');
       setSuccess('JSON minified successfully!');
@@ -111,6 +119,44 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
   const registerEditorThemes = useCallback<BeforeMount>((monaco) => {
     monaco.editor.defineTheme(VITESSE_DARK_THEME, VITESSE_DARK_MONACO_THEME);
     monaco.editor.defineTheme(VITESSE_LIGHT_THEME, VITESSE_LIGHT_MONACO_THEME);
+  }, []);
+
+  const handleEditorMount = useCallback<OnMount>((editor) => {
+    pasteDisposableRef.current?.dispose();
+    pasteDisposableRef.current = editor.onDidPaste(() => {
+      const value = editor.getValue();
+
+      try {
+        const formatted = formatJsonValue(value);
+
+        if (formatted !== value) {
+          const model = editor.getModel();
+
+          if (model) {
+            editor.executeEdits('auto-format-paste', [
+              {
+                range: model.getFullModelRange(),
+                text: formatted,
+                forceMoveMarkers: true,
+              },
+            ]);
+            editor.pushUndoStop();
+          }
+        }
+
+        setError('');
+        setSuccess('JSON formatted successfully!');
+        setTimeout(() => setSuccess(''), 3000);
+      } catch {
+        // Keep the pasted text unchanged; the existing validation status shows the parse error.
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      pasteDisposableRef.current?.dispose();
+    };
   }, []);
 
   const themeClass = isDarkMode ? 'dark' : 'light';
@@ -177,6 +223,7 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
             value={jsonText}
             onChange={handleInputChange}
             beforeMount={registerEditorThemes}
+            onMount={handleEditorMount}
             theme={editorTheme}
             options={{
               contextmenu: false,
