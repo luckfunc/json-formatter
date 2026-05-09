@@ -147,11 +147,11 @@ export const DEFAULT_JSON = `{
     "validate",
     "copy",
     "download",
-    "auto-format"
+    "live-validation"
   ],
   "config": {
     "theme": "auto",
-    "autoFormat": true,
+    "autoFormat": false,
     "lineNumbers": true
   },
   "meta": {
