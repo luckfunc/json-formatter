@@ -96,6 +96,18 @@
         border-color: @dark-error-hover;
       }
     }
+
+    &.copied {
+      background: @dark-success-bg;
+      border-color: @dark-success-border;
+      color: @dark-success;
+
+      &:hover:not(:disabled) {
+        background: @dark-success-bg;
+        border-color: @dark-success-border;
+        color: @dark-success;
+      }
+    }
   }
 
   &.light {
@@ -129,7 +141,25 @@
         border-color: @light-error-hover;
       }
     }
+
+    &.copied {
+      background: @light-success-bg;
+      border-color: @light-success-border;
+      color: @light-success;
+
+      &:hover:not(:disabled) {
+        background: @light-success-bg;
+        border-color: @light-success-border;
+        color: @light-success;
+      }
+    }
   }
+}
+
+.copy-button {
+  min-width: 82px;
+  text-align: center;
+  transition: all 0.15s ease;
 }
 
 .theme-button {

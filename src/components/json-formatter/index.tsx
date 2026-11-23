@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import Editor, { type BeforeMount } from '@monaco-editor/react';
 import {
   DEFAULT_JSON,
@@ -27,7 +27,17 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
   const [jsonText, setJsonText] = useState(DEFAULT_JSON);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
+  const copyTimerRef = useRef<number | null>(null);
   const jsonValidation = useMemo(() => validateJson(jsonText), [jsonText]);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current !== null) {
+        window.clearTimeout(copyTimerRef.current);
+      }
+    };
+  }, []);
 
   const applyJsonValue = useCallback((value: string) => {
     setJsonText(value);
@@ -69,18 +79,30 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
   }, [jsonText]);
 
   const clearAll = useCallback(() => {
+    if (copyTimerRef.current !== null) {
+      window.clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = null;
+    }
     setJsonText('');
     setError('');
     setSuccess('');
+    setIsCopied(false);
   }, []);
 
   const copyToClipboard = useCallback(async () => {
     if (jsonText) {
       try {
         await navigator.clipboard.writeText(jsonText);
-        setSuccess('Copied to clipboard!');
-        setTimeout(() => setSuccess(''), 3000);
+        setIsCopied(true);
+        if (copyTimerRef.current !== null) {
+          window.clearTimeout(copyTimerRef.current);
+        }
+        copyTimerRef.current = window.setTimeout(() => {
+          setIsCopied(false);
+          copyTimerRef.current = null;
+        }, 1800);
       } catch {
+        setIsCopied(false);
         setError('Failed to copy to clipboard');
       }
     }
@@ -138,12 +160,12 @@ export default function JsonFormatter({ isDarkMode, onThemeChange }: JsonFormatt
             minify
           </button>
           <button
-            className={`button ${themeClass}`}
+            className={`button copy-button ${isCopied ? 'copied' : ''} ${themeClass}`}
             onClick={copyToClipboard}
             disabled={!jsonText}
             type="button"
           >
-            copy
+            {isCopied ? '✓ copied' : 'copy'}
           </button>
           <button
             className={`button ${themeClass}`}
